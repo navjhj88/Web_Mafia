@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/navjhj88/Web_Mafia#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "nodemailer": "^6.4.14",
+    "socket.io": "^2.3.0"
   }
 }

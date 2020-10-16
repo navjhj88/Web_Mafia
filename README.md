@@ -26,6 +26,16 @@
 
 
 
+## 프로그램 구성
+
+### API
+
+- express
+- socket.io
+- ejs
+
+
+
 ## UI 구성
 
 [Oven](https://ovenapp.io/view/eZPd84QZMVnr6Ea3UMRIurQDKAyycVRi)
