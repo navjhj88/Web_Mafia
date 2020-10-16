@@ -1,0 +1,22 @@
+{
+  "name": "web_mafia",
+  "version": "1.0.0",
+  "description": "마피아 게임",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/navjhj88/Web_Mafia.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/navjhj88/Web_Mafia/issues"
+  },
+  "homepage": "https://github.com/navjhj88/Web_Mafia#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
