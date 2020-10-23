@@ -7,14 +7,14 @@ const makeHash = (id, pass) => {
 };
 
 const addUser = async(id, mail, hash) => {
-    await fs.writeFile(`./login/mail/${mail}`, hash, { encoding: 'utf-8' });
-    await fs.writeFile(`./login/id/${id}`, hash, { encoding: 'utf-8' });
+    await fs.writeFile(`./users/mail/${mail}`, hash, { encoding: 'utf-8' });
+    await fs.writeFile(`./users/id/${id}`, hash, { encoding: 'utf-8' });
 };
 
 const readUser = async id => {
     let user = null;
     try{
-        user = await fs.readFile(`./login/id/${id}`, { encoding: 'utf-8' });
+        user = await fs.readFile(`./users/id/${id}`, { encoding: 'utf-8' });
     }catch(err){
         user = '';
     }

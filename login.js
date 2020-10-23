@@ -91,8 +91,8 @@ router.get('/', async(req, res) => {
     const pass = req.body.pass;
     const mail = req.body.mail;
     const hash = makeHash(id, pass);
-    const idDir = await fs.readdir('./login/id');
-    const mailDir = await fs.readdir('./login/mail');
+    const idDir = await fs.readdir('./users/id');
+    const mailDir = await fs.readdir('./users/mail');
     const idMail = [mail, id];
     const result = [mailDir, idDir].map((v, i) => v.some(t => t === idMail[i]));
     if(verifyIdMail(id, mail)[2]){
