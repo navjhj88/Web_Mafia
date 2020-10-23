@@ -8,6 +8,6 @@ router.use(express.json());
 router.use(isLogin);
 
 router.get('/', (req, res) => {
-    res.render('main');
+    res.render('main/main');
 });
 module.exports = router;

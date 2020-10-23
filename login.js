@@ -57,7 +57,7 @@ const transporter = nodemailer.createTransport({
 });
 
 router.get('/', async(req, res) => {
-    res.render('login');
+    res.render('login/login');
 }).post('/', async(req, res) => {
     const { id, pass } = req.body;
     const hash = await makeHash(id, pass);
@@ -67,7 +67,7 @@ router.get('/', async(req, res) => {
         res.cookie('hash', hash, { maxAge: 1000 * 60 * 60 * 3 });
         res.redirect('/main');
     }
-    else res.render('login', {msg : '존재하지 않는 id 또는 pass입니다.'});
+    else res.render('login/login', {msg : '존재하지 않는 id 또는 pass입니다.'});
 }).post('/verify', async(req, res) => {
     const { id, mail } = req.body;
     const what = verifyIdMail(id, mail);
@@ -84,7 +84,7 @@ router.get('/', async(req, res) => {
     if (toVerify.has('hash', hash)) {
         toVerify.delete(hash);
         await addUser(id, mail, hash);
-        res.render('Success');
+        res.render('login/Success');
     } else res.render('error', {msg: '잘못된 접근'});
 }).post('/signup', async(req, res) => {
     const id = req.body.id;
@@ -98,7 +98,7 @@ router.get('/', async(req, res) => {
     if(verifyIdMail(id, mail)[2]){
         res.render('error', {msg: '이미 보낸 회원 정보입니다.'});
     } else if(result.some(v => v)){
-        res.render('signup', { flag : `[${result.join(',')}]` });
+        res.render('login/signup', { flag : `[${result.join(',')}]` });
     } else {
         toVerify.add(id, mail, hash);
         const info = await transporter.sendMail({
@@ -113,10 +113,10 @@ router.get('/', async(req, res) => {
             // html: html로 작성된 내용
             html: `<h1>To Verify your account<br>Please, Click beleow link<br></h1><a href="http://localhost:3000/login/verify/?mail=${encodeURIComponent(mail)}&id=${encodeURIComponent(id)}&hash=${encodeURIComponent(hash)}">Verify</a>`,
         });
-        res.render('mail');
+        res.render('login/mail');
     }
 }).get('/signup', async(req, res) => {
-    res.render('signup'); 
+    res.render('login/signup'); 
 });
 
 module.exports = router;

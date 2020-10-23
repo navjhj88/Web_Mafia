@@ -15,12 +15,8 @@ app.use(express.urlencoded({extended:true}));
 
 app.set('view engine', 'ejs');
 
-app.get('/', async(req, res) => {
-    const X = true;
-    if(X){
-        res.redirect('/login');
-    }
-}).get('/*.(gif|css)', async(req, res) => {
+app.get('/', (req, res) =>
+res.redirect('/login')).get('/*.(gif|css)', async(req, res) => {
     const url = decodeURI(req.url);
     const val = await fs.readFile(`.${url}`);
     if(url.match(/\.css$/)){

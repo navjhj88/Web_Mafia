@@ -40,8 +40,8 @@ const isLogin = async (req, res, next) => {
     } else if(val) {
         res.cookie('id', id, { maxAge: 1000 * 60 * 60 * 3 });
         res.cookie('hash', hash, { maxAge: 1000 * 60 * 60 * 3 });
-        if(decodeURIComponent(req.baseUrl) === '/login') res.redirect('/main');
-        else next();
+        if(decodeURIComponent(req.baseUrl) === '/main') next();
+        else res.redirect('/main');
     } else {
         if(decodeURIComponent(req.baseUrl) === '/login') {
             next();
