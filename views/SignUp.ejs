@@ -73,8 +73,6 @@
                 delete val.status;
                 pointFun(val);
                 document.querySelectorAll('.con').forEach(v => v.classList.toggle('none'));
-            } else {
-                form.submit();
             }
             e.preventDefault();
             e.stopPropagation();

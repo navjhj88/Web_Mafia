@@ -2,19 +2,19 @@ const express = require('express');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const fs = require('fs/promises');
-const cookieParser = require('cookie-parser');
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({extended:true}));
-router.use(cookieParser());
 const makeHash = (id, pass) => {
     const salt = 'whguswo';
     return crypto.createHash('sha512').update(`${id}${salt}${pass}`).digest('base64');
 };
 
 const verifyIdMail = (id, mail) => {
+    console.log(toVerify);
     let what = [id, mail].map(v => toVerify.has('ids', v));
     what = what.concat(what.some(v => v));
+    console.log(what);
     return what;
 };
 
@@ -77,12 +77,12 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-router.get('/', (req, res) => 
-res.render('login')).post('/', async(req, res) => {
+router.get('/', (req, res) => {
+    res.render('login')
+}).post('/', async(req, res) => {
     const { id, pass } = req.body;
     const hash = await makeHash(id, pass);
     const val = await readUser(id);
-    console.log(val, hash);
     if(val === hash){
         res.render('main');
     } else {
@@ -113,20 +113,14 @@ res.render('login')).post('/', async(req, res) => {
     const pass = req.body.pass;
     const mail = req.body.mail;
     const hash = makeHash(id, pass);
-    const dir = await fs.readdir('login');
-    let flag = [false, false];
+    const idDir = await fs.readdir('./login/id');
+    const mailDir = await fs.readdir('./login/mail');
+    const idMail = [mail, id];
+    const result = [mailDir, idDir].map((v, i) => v.some(t => t === idMail[i]));
     if(verifyIdMail(id, mail)[2]){
         res.render('error', {msg: '이미 보낸 회원 정보입니다.'});
-    } else if(dir.some(v => {
-        const val = v.split(/(?:\.)((?:(?!\.).)+)$/).filter(v => v);
-        return [mail, id].some((v, i) => {
-            if(v === val[i]){
-                flag[i] = true;
-                return true;
-            } else return false;
-        });
-    })){
-        res.render('signup', { flag : `[${flag.join(',')}]` });
+    } else if(result.some(v => v)){
+        res.render('signup', { flag : `[${result.join(',')}]` });
     } else {
         toVerify.add(id, mail, hash);
         const info = await transporter.sendMail({
