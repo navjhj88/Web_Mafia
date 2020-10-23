@@ -1,0 +1,25 @@
+.con{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+td:nth-child(1){
+    text-align: left;
+}
+td, td[colspan="2"]{
+    text-align: center;
+}
+img{
+    vertical-align: middle;
+}
+.none{
+    display: none;
+}
+.point{
+    border:3px dashed red;
+}
+table{
+    border-collapse: collapse;
+}
