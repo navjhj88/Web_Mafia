@@ -1,23 +1,21 @@
 const express = require('express');
-const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const cookieParser = require('cookie-parser');
 const fs = require('fs/promises');
 const router = express.Router();
+const { makeHash, addUser, isIdHash, isLogin } = require('./modules');
+
+router.use(cookieParser());
 router.use(express.json());
 router.use(express.urlencoded({extended:true}));
-const makeHash = (id, pass) => {
-    const salt = 'whguswo';
-    return crypto.createHash('sha512').update(`${id}${salt}${pass}`).digest('base64');
-};
+router.use(isLogin);
 
 const verifyIdMail = (id, mail) => {
     console.log(toVerify);
     let what = [id, mail].map(v => toVerify.has('ids', v));
     what = what.concat(what.some(v => v));
-    console.log(what);
     return what;
 };
-
 const toVerify = {
     hash : new Map(),
     ids : new Set(),
@@ -42,25 +40,6 @@ const toVerify = {
         return this[type].has(value);
     },
 };
-const load = async()=>{
-    const dir = await fs.readdir('login');
-    console.log(dir);
-};
-
-const addUser = async(id, mail, hash) => {
-    await fs.writeFile(`./login/mail/${mail}`, hash, { encoding: 'utf-8' });
-    await fs.writeFile(`./login/id/${id}`, hash, { encoding: 'utf-8' });
-}
-
-const readUser = async(id) => {
-    let user = null;
-    try{
-        user = await fs.readFile(`./login/id/${id}`, { encoding: 'utf-8' });
-    }catch(err){
-        user = '';
-    }
-    return user;
-}
 
 const transporter = nodemailer.createTransport({
     // 사용하고자 하는 서비스, gmail계정으로 전송할 예정이기에 'gmail'
@@ -77,17 +56,18 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-router.get('/', (req, res) => {
-    res.render('login')
+router.get('/', async(req, res) => {
+    res.render('login');
 }).post('/', async(req, res) => {
     const { id, pass } = req.body;
     const hash = await makeHash(id, pass);
-    const val = await readUser(id);
-    if(val === hash){
-        res.render('main');
-    } else {
-        res.render('login', {msg : '존재하지 않는 id 또는 pass입니다.'});
+    const val = await isIdHash(id, hash);
+    if(val) {
+        res.cookie('id', id, { maxAge: 1000 * 60 * 60 * 3 });
+        res.cookie('hash', hash, { maxAge: 1000 * 60 * 60 * 3 });
+        res.redirect('/main');
     }
+    else res.render('login', {msg : '존재하지 않는 id 또는 pass입니다.'});
 }).post('/verify', async(req, res) => {
     const { id, mail } = req.body;
     const what = verifyIdMail(id, mail);
@@ -105,9 +85,7 @@ router.get('/', (req, res) => {
         toVerify.delete(hash);
         await addUser(id, mail, hash);
         res.render('Success');
-    } else {
-        res.render('error', {msg: '잘못된 접근'});
-    }
+    } else res.render('error', {msg: '잘못된 접근'});
 }).post('/signup', async(req, res) => {
     const id = req.body.id;
     const pass = req.body.pass;
@@ -140,5 +118,5 @@ router.get('/', (req, res) => {
 }).get('/signup', async(req, res) => {
     res.render('signup'); 
 });
-load();
+
 module.exports = router;
