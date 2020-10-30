@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" type="text/css" href="/css/login.css">
+    <script src="/js/loginPattern.js"></script>
 </head>
 
 <body>
@@ -16,11 +17,11 @@
                 <form action="/login/signup" method="POST">
                     <tr>
                         <td>ID : </td>
-                        <td><input type="text" required name="id" pattern="^([a-z])([a-z0-9_])+" minlength="8" maxlength="20"></td>
+                        <td><input type="text" required name="id"></td>
                     </tr>
                     <tr>
                         <td>Password : </td>
-                        <td><input type="password" required name="pass" pattern="^([a-zA-Z0-9_])+" minlength="6" maxlength="50"></td>
+                        <td><input type="password" required name="pass"></td>
                     </tr>
                     <tr>
                         <td>Mail : </td>
@@ -42,7 +43,7 @@
     </div>
     <script>
         const id = document.querySelector('[name="id"]');
-        const patternMail = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
+        const pass = document.querySelector('[name="pass"]');
         const mail = document.querySelector('[name="mail"]');
         const submit = document.querySelector('[type="submit"]');
         const pointFun = val => {
@@ -53,8 +54,8 @@
                 }
             });
             document.querySelector('table').addEventListener('click', e => document.querySelectorAll('.point').forEach(v => v.classList.toggle('point')), {once:true});
-        }
-        mail.pattern = patternMail.source;
+        };
+
         const form = document.querySelector('form');
         const Something = async e => {
             document.querySelectorAll('.con').forEach(v => v.classList.toggle('none'));
@@ -82,15 +83,24 @@
             e.stopPropagation();
         });
         window.addEventListener('load', e => {
-            const flag = <%=typeof flag === "undefined" ? false : flag%>;
+            const flag = <%- typeof flag === "undefined" ? false : flag %>;
             console.log(flag);
             if(flag){
                 const obj = {
-                    mail: flag[0],
-                    id: flag[1]
+                    mail: flag.mail,
+                    id: flag.id,
+                    pass: flag.pass
                 };
                 pointFun(obj);
             }
+
+            mail.pattern = patternMail.source;
+            id.pattern = idPattern.pattern;
+            id.minLength = idPattern.minlength;
+            id.maxLength = idPattern.maxlength;
+            pass.pattern = passPattern.pattern;
+            pass.minLength = passPattern.minlength;
+            pass.maxLength = passPattern.maxlength;
         },{once:true});
     </script>
 </body>

@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs/promises');
 const router = express.Router();
 const { makeHash, addUser, isIdHash, isLogin, howCookie } = require('./modules');
+const { isPattern } = require('./js/loginPattern');
 
 router.use(cookieParser());
 router.use(express.json());
@@ -78,20 +79,33 @@ router.get('/', async(req, res) => {
     res.render('login/signup');
 
 }).post('/signup', async(req, res) => {
-    const id = req.body.id;
-    const pass = req.body.pass;
-    const mail = req.body.mail;
+    const { id, pass, mail } = req.body;
+    const checkPattern = isPattern(id, pass, mail);
+    console.log(checkPattern);
+    if(checkPattern.some(v => v)){
+        const obj = {
+            id: checkPattern[0],
+            pass: checkPattern[1],
+            mail: checkPattern[2]
+        }
+        res.render('login/signup', { flag : JSON.stringify(obj) });
+        return false;
+    }
     const hash = makeHash(id, pass);
     const idDir = await fs.readdir('./users/id');
     const mailDir = await fs.readdir('./users/mail');
-    const idMail = [mail, id];
-    const result = [mailDir, idDir].map((v, i) => v.some(t => t === idMail[i]));
+    const idMail = [id, mail];
+    const result = [idDir, mailDir].map((v, i) => v.some(t => t === idMail[i]));
 
     if(verifyIdMail(id, mail)[2]){
         res.render('error', {msg: '이미 보낸 회원 정보입니다.'});
 
     } else if(result.some(v => v)){
-        res.render('login/signup', { flag : `[${result.join(',')}]` });
+        const obj = {
+            id: result[0],
+            mail: result[1]
+        }
+        res.render('login/signup', { flag : JSON.stringify(obj) });
 
     } else {
         toVerify.add(id, mail, hash);

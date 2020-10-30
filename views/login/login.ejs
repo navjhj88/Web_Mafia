@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" type="text/css" href="/css/login.css">
+    <script src="/js/loginPattern.js"></script>
     <style>
         #msg{
             <%if(typeof msg === 'undefined'){%>
@@ -23,11 +24,11 @@
                 <form action="/login" method="POST">
                     <tr>
                         <td>ID : </td>
-                        <td><input type="text" required name="id" pattern="^([a-z])([a-z0-9_])+" minlength="8" maxlength="20"></td>
+                        <td><input type="text" required name="id"></td>
                     </tr>
                     <tr>
                         <td>Password : </td>
-                        <td><input type="password" required name="pass" pattern="^([a-zA-Z0-9_])+" minlength="6" maxlength="50"></td>
+                        <td><input type="password" required name="pass"></td>
                     </tr>
                     <tr>
                         <td>Submit : </td>
@@ -41,6 +42,16 @@
         </table>
     </div>
     <script>
+        window.addEventListener('load', () => {
+            const id = document.querySelector('[name="id"]');
+            const pass = document.querySelector('[name="pass"]');
+            id.pattern = idPattern.pattern;
+            id.minLength = idPattern.minlength;
+            id.maxLength = idPattern.maxlength;
+            pass.pattern = passPattern.pattern;
+            pass.minLength = passPattern.minlength;
+            pass.maxLength = passPattern.maxlength;
+        }, {once: true});
         document.querySelector('input[type="submit"]').addEventListener('click', e => {
             e.stopPropagation();
         });

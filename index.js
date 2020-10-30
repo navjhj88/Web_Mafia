@@ -16,11 +16,13 @@ app.use(express.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) =>
-res.redirect('/login')).get('/*.(gif|css)', async(req, res) => {
+res.redirect('/login')).get('/*.(gif|css|js)', async(req, res) => {
     const url = decodeURI(req.url);
     const val = await fs.readFile(`.${url}`);
     if(url.match(/\.css$/)){
         res.setHeader('Content-Type', 'text/css');
+    } else if(url.match(/\.js$/)){
+        res.setHeader('Content-Type', 'application/js');
     }
     res.end(val);
 });
