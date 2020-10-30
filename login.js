@@ -119,7 +119,7 @@ router.get('/', async(req, res) => {
             // 보내는 메일의 내용을 입력
             // text: 일반 text로 작성된 내용
             // html: html로 작성된 내용
-            html: `<h1>To Verify your account<br>Please, Click beleow link<br></h1><a href="http://localhost:3000/login/verify/?mail=${encodeURIComponent(mail)}&id=${encodeURIComponent(id)}&hash=${encodeURIComponent(hash)}">Verify</a>`,
+            html: `<h1>To Verify your account<br>Please, Click beleow link<br></h1><a href="http://${req.headers.host}/login/verify/?mail=${encodeURIComponent(mail)}&id=${encodeURIComponent(id)}&hash=${encodeURIComponent(hash)}">Verify</a>`,
         });
 
         res.render('login/mail');
