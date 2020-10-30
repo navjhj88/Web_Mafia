@@ -4,25 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
     <style>
-        body{
-            display: flex;
-            height: 100vh;
-            flex-direction: column;
-        }
-        #menu{
-            display: flex;
-            width:100vw;
-            height: 100px;
-            border: 3px solid red;
-            box-sizing: border-box;
-            overflow:hidden;
-            justify-content: space-around;
-            align-items: center;
-        }
-        #container{
-            flex-grow: 1;
-        }
         iframe{
             box-sizing: border-box;
             width:100%;
@@ -37,13 +20,34 @@
         <button>Sign out</button>
     </div>
     <div id="container">
-        <iframe src="https://developer.mozilla.org/ko/"></iframe>
+        <iframe src="/main/waiting"></iframe>
     </div>
     <script>
         const button = document.querySelector('button');
         button.addEventListener('click', e => {
-            location.href = '/login/signout';
+            location.href = '/login/logout';
         });
+        (async()=>{
+            const update = () => new Promise((res, rej) => {
+                setTimeout(async() => {
+                    const obj = {
+                        status: 'update'
+                    };
+                    const response = await fetch('/login/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body:JSON.stringify(obj)
+                    });
+                    console.log('cookie update');
+                    res(response);
+                }, 1000 * 60);
+            })
+            while(true){
+                await update();
+            }
+        })();
     </script>
 </body>
 </html>

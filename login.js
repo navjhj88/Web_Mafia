@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 const fs = require('fs/promises');
 const router = express.Router();
-const { makeHash, addUser, isIdHash, isLogin } = require('./modules');
+const { makeHash, addUser, isIdHash, isLogin, howCookie } = require('./modules');
 
 router.use(cookieParser());
 router.use(express.json());
@@ -68,24 +68,15 @@ router.get('/', async(req, res) => {
         res.redirect('/main');
     }
     else res.render('login/login', {msg : '존재하지 않는 id 또는 pass입니다.'});
-}).post('/verify', async(req, res) => {
-    const { id, mail } = req.body;
-    const what = verifyIdMail(id, mail);
-    if(what[2]){
-        const obj = {status: 'bad', id: what[0], mail: what[1]};
-        res.end(JSON.stringify(obj));
-    } else {
-        res.end('{"status":"good"}');
-    }
-}).get('/verify', async(req, res) => {
-    const hash = decodeURIComponent(req.query.hash);
-    const id = decodeURIComponent(req.query.id);
-    const mail = decodeURIComponent(req.query.mail);
-    if (toVerify.has('hash', hash)) {
-        toVerify.delete(hash);
-        await addUser(id, mail, hash);
-        res.render('login/Success');
-    } else res.render('error', {msg: '잘못된 접근'});
+
+}).get('/logout', (req, res) => {
+    res.clearCookie('id');
+    res.clearCookie('hash');
+    res.redirect('/login');
+
+}).get('/signup', async(req, res) => {
+    res.render('login/signup');
+
 }).post('/signup', async(req, res) => {
     const id = req.body.id;
     const pass = req.body.pass;
@@ -95,10 +86,13 @@ router.get('/', async(req, res) => {
     const mailDir = await fs.readdir('./users/mail');
     const idMail = [mail, id];
     const result = [mailDir, idDir].map((v, i) => v.some(t => t === idMail[i]));
+
     if(verifyIdMail(id, mail)[2]){
         res.render('error', {msg: '이미 보낸 회원 정보입니다.'});
+
     } else if(result.some(v => v)){
         res.render('login/signup', { flag : `[${result.join(',')}]` });
+
     } else {
         toVerify.add(id, mail, hash);
         const info = await transporter.sendMail({
@@ -113,10 +107,39 @@ router.get('/', async(req, res) => {
             // html: html로 작성된 내용
             html: `<h1>To Verify your account<br>Please, Click beleow link<br></h1><a href="http://localhost:3000/login/verify/?mail=${encodeURIComponent(mail)}&id=${encodeURIComponent(id)}&hash=${encodeURIComponent(hash)}">Verify</a>`,
         });
+
         res.render('login/mail');
     }
-}).get('/signup', async(req, res) => {
-    res.render('login/signup'); 
+
+}).post('/update', (req, res) => {
+    if(req.body.status === 'update'){
+        let { id, hash } = req.cookies;
+        howCookie(res, { type: 'update', id, hash });
+        console.log('Cookie update');
+        res.end('update');
+    }
+
+}).get('/verify', async(req, res) => {
+    const hash = decodeURIComponent(req.query.hash);
+    const id = decodeURIComponent(req.query.id);
+    const mail = decodeURIComponent(req.query.mail);
+    if (toVerify.has('hash', hash)) {
+        toVerify.delete(hash);
+        await addUser(id, mail, hash);
+        res.render('login/Success');
+
+    } else res.render('error', {msg: '잘못된 접근'});
+    
+}).post('/verify', async(req, res) => {
+    const { id, mail } = req.body;
+    const what = verifyIdMail(id, mail);
+    if(what[2]){
+        const obj = {status: 'bad', id: what[0], mail: what[1]};
+        res.end(JSON.stringify(obj));
+    } else {
+        res.end('{"status":"good"}');
+    }
+
 });
 
 module.exports = router;

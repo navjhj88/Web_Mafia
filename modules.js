@@ -27,30 +27,37 @@ const isIdHash = async (id, hash) => {
     else false;
 };
 
+const howCookie = (res, options) => {
+    if(options.type === 'update'){
+        let { id, hash } = options;
+        res.cookie('id', id, { maxAge: 1000 * 60 * 60 * 3 });
+        res.cookie('hash', hash, { maxAge: 1000 * 60 * 60 * 3 });
+    } else if(options.type === 'clear'){
+        res.clearCookie('id');
+        res.clearCookie('hash');
+    }
+};
+
 const isLogin = async (req, res, next) => {
     let { id, hash } = req.cookies;
     id = decodeURIComponent(id);
     hash = decodeURIComponent(hash);
     const val = await isIdHash(id, hash);
     console.log(req.originalUrl)
-    if(decodeURIComponent(req.originalUrl) === '/login/signout'){
-        res.clearCookie('id');
-        res.clearCookie('hash');
-        res.redirect('/login');
-    } else if(val) {
-        res.cookie('id', id, { maxAge: 1000 * 60 * 60 * 3 });
-        res.cookie('hash', hash, { maxAge: 1000 * 60 * 60 * 3 });
-        if(decodeURIComponent(req.baseUrl) === '/main') next();
-        else res.redirect('/main');
-    } else {
-        if(decodeURIComponent(req.baseUrl) === '/login') {
-            next();
+    if(!decodeURIComponent(req.originalUrl) === '/login/logout'){
+        if(val) {
+            howCookie(res, {type: 'update', id, hash});
+            if(decodeURIComponent(req.baseUrl) === '/main') next();
+            else res.redirect('/main');
         } else {
-            res.clearCookie('id');
-            res.clearCookie('hash');
-            res.redirect('/login');
+            if(decodeURIComponent(req.baseUrl) === '/login') {
+                next();
+            } else {
+                howCookie(res, 'clear');
+                res.redirect('/login');
+            }
         }
-    }
+    } else next();
 }
 
-module.exports = { makeHash, addUser, isIdHash, isLogin };
+module.exports = { makeHash, addUser, isIdHash, isLogin, howCookie };

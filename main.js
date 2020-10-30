@@ -10,4 +10,7 @@ router.use(isLogin);
 router.get('/', (req, res) => {
     res.render('main/main');
 });
+router.get('/:view', (req, res) =>
+    res.render(`main/${req.params.view}`));
+
 module.exports = router;
