@@ -5,8 +5,10 @@ const io = require('socket.io')(http);
 const PORT = 3000;
 const fs = require('fs/promises');
 const login = require('./login');
+const main = require('./main');
 
 app.use('/login', login);
+app.use('/main', main)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

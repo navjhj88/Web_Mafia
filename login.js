@@ -56,7 +56,16 @@ const transporter = nodemailer.createTransport({
 });
 
 router.get('/', (req, res) => {
-    res.render('login');
+    res.render('login/login');
+}).post('/', async(req, res) => {
+    const { id, pass } = req.body;
+    const hash = await makeHash(id, pass);
+    const val = await isIdHash(id, hash);
+    if (val) {
+        res.cookie('id', id, { maxAge: 1000 * 60 * 60 * 3 });
+        res.cookie('hash', hash, { maxAge: 1000 * 60 * 60 * 3 });
+        res.redirect('/main');
+    } else res.render('login/login', { msg: '존재하지 않는 id 또는 pass입니다.' });
 }).get('/verify', async(req, res) => {
     //URI(URL과 유사)에서 id, mail
     const hash = decodeURIComponent(req.query.hash);
@@ -67,7 +76,7 @@ router.get('/', (req, res) => {
     if (toVerify.has('hash', hash)) {
         toVerify.delete(hash);
         await addUser(id, mail, hash);
-        res.render('Success');
+        res.render('login/Success');
     } else res.render('error', { msg: '잘못된 접근' });
     //URI의 hash값이 toVerify에 없다면 정상적인 접근이 아니므로 잘못된 접근 출력
 }).post('/verify', async(req, res) => {
@@ -80,7 +89,7 @@ router.get('/', (req, res) => {
         res.end('{"status":"good"}');
     }
 }).get('/signup', async(req, res) => {
-    res.render('SignUp')
+    res.render('login/SignUp')
 }).post('/signup', async(req, res) => {
     const id = req.body.id;
     const pass = req.body.pass;
@@ -94,7 +103,7 @@ router.get('/', (req, res) => {
     if (verifyIdMail(id, mail)[2]) {
         res.render('error', { msg: '이미 보낸 회원 정보입니다.' });
     } else if (result.some(v => v)) { //요청만 중복검사
-        res.render('signup', { flag: `[${result.join(',')}]` });
+        res.render('login/signup', { flag: `[${result.join(',')}]` });
     } else { //인증이메일 보내기
         toVerify.add(id, mail, hash);
         const info = await transporter.sendMail({
@@ -109,7 +118,7 @@ router.get('/', (req, res) => {
             // html: html로 작성된 내용
             html: `<h1>To Verify your account<br>Please, Click beleow link<br></h1><a href="http://localhost:3000/login/verify/?mail=${encodeURIComponent(mail)}&id=${encodeURIComponent(id)}&hash=${encodeURIComponent(hash)}">Verify</a>`,
         });
-        res.render('mail');
+        res.render('login/mail');
     }
 });
 
