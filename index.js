@@ -1,7 +1,5 @@
 const express = require('express');
-const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const { app, http } = require('./socket');
 const PORT = 3000;
 const fs = require('fs/promises');
 const login = require('./login');
@@ -16,7 +14,7 @@ app.use(express.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) =>
-res.redirect('/login')).get('/*.(gif|css|js)', async(req, res) => {
+res.redirect('/login')).get('/*.(gif|css|js|map)$', async(req, res) => {
     const url = decodeURI(req.url);
     const val = await fs.readFile(`.${url}`);
     if(url.match(/\.css$/)){
@@ -25,8 +23,10 @@ res.redirect('/login')).get('/*.(gif|css|js)', async(req, res) => {
         res.setHeader('Content-Type', 'application/js');
     }
     res.end(val);
+}).get('/test', (req, res) => {
+    res.render('test');
 });
 
 http.listen(PORT, () => {
     console.log('Running at ' + PORT);
-})
+});
