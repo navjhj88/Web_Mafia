@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/node_modules/socket.io/client-dist/socket.io.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <a href="/main/waiting">나가기</a>
+    <script>
+        const namespace = <%- namespace %>;
+        console.log(namespace);
+        const socket = io(`/${encodeURIComponent(namespace)}`);
+    </script>
+</body>
+</html>

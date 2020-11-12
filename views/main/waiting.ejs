@@ -7,7 +7,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <script src="/node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="/node_modules/socket.io/client-dist/socket.io.js"></script>
     <title>Documents</title>
     <style>
         label{
@@ -19,6 +19,9 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
         방만들기
     </button>
+    <div id="container">
+
+    </div>
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -44,20 +47,49 @@
         </div>
       </div>
     <script>
-        const pass = document.querySelector('#pass');
-        const accept = document.querySelector('#accept');
-        const socket = io(location.origin);
-        socket.emit('join', '대기실');
+      
+      const pass = document.querySelector('#pass');
+      const accept = document.querySelector('#accept');
+      const container = document.querySelector('#container');
+      const socket = io('/waiting');
+      socket.emit('join', '대기실');
+      {
+        const Rooms = <%- JSON.stringify(Rooms) %>;
+        const makeRoom = data => {
+          let a = document.createElement('a');
+          a.innerHTML = data.name;
+          console.log(data.id)
+          a.href = `/main/room?id=${data.id}`;
+          a.dataset.id = data.id;
+          container.appendChild(a);
+        };
+        Rooms.forEach(makeRoom);
+        socket.on('ready', data => {
+          location.href = `/main/room?id=${data}`;
+        });
+        socket.on('room', data => {
+          if(data.act === 'add'){
+            makeRoom(data);
+          } else {
+            let a = document.querySelector(`[data-id="${data.id}"]`);
+            if(a) container.removeChild(a);
+          }
+          
+        });
+      }
+      
+      {
         accept.addEventListener('click', e => {
-            const roomTitle = document.querySelector('#roomTitle').value;
-            const pass = document.querySelector('#pass');
-            const roomPass = pass.checked ? document.querySelector('#roomPass').value : false;
-            socket.emit('makeRoom', {roomTitle, roomPass});
+          const roomTitle = document.querySelector('#roomTitle').value;
+          const pass = document.querySelector('#pass');
+          const roomPass = pass.checked ? document.querySelector('#roomPass').value : false;
+          socket.emit('makeRoom', {roomTitle, roomPass});
         });
         pass.addEventListener('change', e => {
             let roomPass = document.querySelector('#roomPass');
             roomPass.readOnly = !roomPass.readOnly;
         });
+      }
     </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

@@ -44,7 +44,7 @@ const isLogin = async (req, res, next) => {
     hash = decodeURIComponent(hash);
     const val = await isIdHash(id, hash);
     console.log(req.originalUrl)
-    if(!decodeURIComponent(req.originalUrl) === '/login/logout'){
+    if(!(decodeURIComponent(req.originalUrl) === '/login/logout')){
         if(val) {
             howCookie(res, {type: 'update', id, hash});
             if(decodeURIComponent(req.baseUrl) === '/main') next();
